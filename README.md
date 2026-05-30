@@ -8,6 +8,8 @@
 
 Kelola bahan makanan, pantau masa kadaluarsa, kurangi food waste, dan dapatkan rekomendasi resep berbasis AI.
 
+🚀 **Live Demo:** https://sisabisa.vercel.app/
+
 </div>
 
 ---
@@ -16,7 +18,19 @@ Kelola bahan makanan, pantau masa kadaluarsa, kurangi food waste, dan dapatkan r
 
 **SisaBisa** adalah platform manajemen bahan makanan berbasis AI yang membantu pengguna mengelola inventory makanan, memantau masa kadaluarsa, mengurangi food waste, dan memperoleh rekomendasi resep berdasarkan bahan yang tersedia.
 
-Aplikasi ini dikembangkan sebagai proyek **Capstone Coding Camp powered by DBS Foundation** dengan fokus pada pemanfaatan teknologi untuk mengurangi pemborosan makanan (food waste) di lingkungan rumah tangga.
+Aplikasi ini dikembangkan sebagai proyek **Capstone Coding Camp powered by DBS Foundation** dengan fokus pada pemanfaatan teknologi untuk mengurangi pemborosan makanan (*food waste*) di lingkungan rumah tangga.
+
+---
+
+## 🌐 Live Demo
+
+### Website
+
+https://sisabisa.vercel.app/
+
+### Backend API
+
+https://sisabisa-api.onrender.com
 
 ---
 
@@ -24,10 +38,10 @@ Aplikasi ini dikembangkan sebagai proyek **Capstone Coding Camp powered by DBS F
 
 Banyak rumah tangga mengalami masalah seperti:
 
-- Lupa menggunakan bahan makanan sebelum kadaluarsa.
-- Tidak mengetahui masa simpan bahan berdasarkan metode penyimpanan.
-- Kesulitan menentukan menu masakan dari bahan yang tersedia.
-- Sering membuang bahan makanan yang sebenarnya masih dapat dimanfaatkan.
+* Lupa menggunakan bahan makanan sebelum kadaluarsa.
+* Tidak mengetahui masa simpan bahan berdasarkan metode penyimpanan.
+* Kesulitan menentukan menu masakan dari bahan yang tersedia.
+* Sering membuang bahan makanan yang sebenarnya masih dapat dimanfaatkan.
 
 SisaBisa hadir sebagai solusi untuk membantu pengguna mengelola bahan makanan secara lebih efektif, hemat, dan berkelanjutan.
 
@@ -39,53 +53,55 @@ SisaBisa hadir sebagai solusi untuk membantu pengguna mengelola bahan makanan se
 
 ### 📊 Dashboard Monitoring
 
-- Ringkasan inventory pengguna
-- Total bahan aktif
-- Bahan hampir expired
-- Bahan expired
-- Resep favorit
-- Insight AI terkait kondisi inventory
+* Ringkasan inventory pengguna
+* Total bahan aktif
+* Bahan hampir expired
+* Bahan expired
+* Resep favorit
+* Insight AI terkait kondisi inventory
 
 ---
 
 ### 📦 Inventory Management
 
-- Menambahkan bahan makanan
-- Menghapus bahan makanan
-- Melihat status kadaluarsa bahan
-- Filter inventory berdasarkan status
-- Pencarian inventory
+* Menambahkan bahan makanan
+* Menghapus bahan makanan
+* Melihat status kadaluarsa bahan
+* Filter inventory berdasarkan status
+* Pencarian inventory
 
 ---
 
 ### ⏳ Expiry Checker
 
-- Pencarian bahan dari database master
-- Pemilihan metode penyimpanan
-- Perhitungan estimasi tanggal kadaluarsa otomatis
-- Data berasal dari aturan penyimpanan yang dikelola admin
+* Pencarian bahan dari database master
+* Pemilihan metode penyimpanan
+* Perhitungan estimasi tanggal kadaluarsa otomatis
+* Data berasal dari aturan penyimpanan yang dikelola admin
 
 ---
 
 ### 🤖 AI Recipe Recommendation
 
-- Rekomendasi resep berdasarkan inventory pengguna
-- Pemanfaatan bahan yang hampir expired
-- Integrasi model AI
+* Rekomendasi resep berdasarkan inventory pengguna
+* Pemanfaatan bahan yang hampir expired
+* Integrasi model AI
 
 ---
 
 ### ❤️ Favorite Recipes
 
-- Menyimpan resep favorit
-- Mengakses resep yang sering digunakan
+* Menyimpan resep favorit
+* Mengakses resep yang sering digunakan
 
 ---
 
-### 📧 Email Reminder
+### 📧 Email Reminder & OTP Verification
 
-- Pengingat bahan yang mendekati masa kadaluarsa
-- Notifikasi dikirim melalui email
+* OTP Verifikasi Akun
+* OTP Reset Password
+* Pengingat bahan yang mendekati masa kadaluarsa
+* Email dikirim menggunakan Brevo SMTP
 
 ---
 
@@ -95,11 +111,11 @@ SisaBisa hadir sebagai solusi untuk membantu pengguna mengelola bahan makanan se
 
 Menampilkan:
 
-- Total ingredient
-- Total ingredient aktif
-- Total ingredient diarsipkan
-- Total pengguna
-- Ingredient terbaru yang ditambahkan
+* Total ingredient
+* Total ingredient aktif
+* Total ingredient diarsipkan
+* Total pengguna
+* Ingredient terbaru yang ditambahkan
 
 ---
 
@@ -107,17 +123,17 @@ Menampilkan:
 
 Admin dapat:
 
-- Menambahkan ingredient baru
-- Mengedit ingredient
-- Mengarsipkan ingredient
-- Mengaktifkan kembali ingredient
-- Mengatur masa simpan berdasarkan metode penyimpanan
+* Menambahkan ingredient baru
+* Mengedit ingredient
+* Mengarsipkan ingredient
+* Mengaktifkan kembali ingredient
+* Mengatur masa simpan berdasarkan metode penyimpanan
 
 Perubahan data ingredient langsung digunakan oleh:
 
-- Expiry Checker
-- Inventory User
-- AI Recommendation System
+* Expiry Checker
+* Inventory User
+* AI Recommendation System
 
 ---
 
@@ -163,6 +179,22 @@ Halaman pengelolaan ingredient yang menjadi master data aplikasi.
 
 ---
 
+# 🚀 Production Status
+
+✅ Frontend Deployed on Vercel
+
+✅ Backend Deployed on Render
+
+✅ Database Hosted on Supabase
+
+✅ Email Notification Powered by Brevo
+
+✅ AI Recommendation Service Online
+
+✅ OTP Verification System Active
+
+---
+
 # 🏗️ System Architecture
 
 ```text
@@ -191,39 +223,41 @@ AI Recommendation Service
 
 ## Frontend
 
-- React.js
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Axios
-- React Hot Toast
-- Lucide React
+* React.js
+* Vite
+* Tailwind CSS
+* React Router DOM
+* Axios
+* React Hot Toast
+* Lucide React
 
 ---
 
 ## Backend
 
-- Node.js
-- Express.js
-- JWT Authentication
-- PostgreSQL
-- Supabase
+* Node.js
+* Express.js
+* JWT Authentication
+* PostgreSQL
+* Supabase
+* Nodemailer
 
 ---
 
 ## AI & External Services
 
-- Hugging Face Space
-- Resend API
-- Nodemailer
+* Hugging Face Space
+* Brevo SMTP
+* AI Recommendation Model
 
 ---
 
 ## Deployment
 
-- Frontend : Vercel
-- Backend : Railway / Render
-- Database : Supabase
+* Frontend : Vercel
+* Backend : Render
+* Database : Supabase
+* Email Service : Brevo
 
 ---
 
@@ -266,13 +300,13 @@ SisaBisa
 users
 ```
 
-| Field | Type |
-|---------|---------|
-| id | UUID |
-| name | VARCHAR |
-| email | VARCHAR |
-| password | TEXT |
-| role | VARCHAR |
+| Field    | Type    |
+| -------- | ------- |
+| id       | UUID    |
+| name     | VARCHAR |
+| email    | VARCHAR |
+| password | TEXT    |
+| role     | VARCHAR |
 
 ---
 
@@ -282,11 +316,11 @@ users
 ingredients
 ```
 
-| Field | Type |
-|---------|---------|
-| id | UUID |
-| name | VARCHAR |
-| category | VARCHAR |
+| Field     | Type    |
+| --------- | ------- |
+| id        | UUID    |
+| name      | VARCHAR |
+| category  | VARCHAR |
 | is_active | BOOLEAN |
 
 ---
@@ -297,11 +331,11 @@ ingredients
 ingredient_expiry
 ```
 
-| Field | Type |
-|---------|---------|
-| ingredient_id | UUID |
-| storage | VARCHAR |
-| days | INTEGER |
+| Field         | Type    |
+| ------------- | ------- |
+| ingredient_id | UUID    |
+| storage       | VARCHAR |
+| days          | INTEGER |
 
 ---
 
@@ -311,16 +345,16 @@ ingredient_expiry
 user_inventory
 ```
 
-| Field | Type |
-|---------|---------|
-| id | UUID |
-| user_id | UUID |
-| ingredient_id | UUID |
+| Field           | Type    |
+| --------------- | ------- |
+| id              | UUID    |
+| user_id         | UUID    |
+| ingredient_id   | UUID    |
 | ingredient_name | VARCHAR |
-| quantity | NUMERIC |
-| unit | VARCHAR |
-| storage | VARCHAR |
-| expired_at | DATE |
+| quantity        | NUMERIC |
+| unit            | VARCHAR |
+| storage         | VARCHAR |
+| expired_at      | DATE    |
 
 ---
 
@@ -337,7 +371,7 @@ favorite_recipes
 ## Clone Repository
 
 ```bash
-git clone https://github.com/username/sisabisa.git
+git clone https://github.com/sosokhitam/sisabisa-capstone.git
 ```
 
 ---
@@ -352,7 +386,7 @@ npm install
 npm run dev
 ```
 
-Frontend akan berjalan pada:
+Frontend berjalan pada:
 
 ```text
 http://localhost:5173
@@ -370,7 +404,7 @@ npm install
 npm run dev
 ```
 
-Backend akan berjalan pada:
+Backend berjalan pada:
 
 ```text
 http://localhost:3000
@@ -392,8 +426,6 @@ DB_PASSWORD=
 DB_PORT=
 
 JWT_SECRET=
-
-RESEND_API_KEY=
 
 AI_API_URL=
 
@@ -420,20 +452,22 @@ VITE_API_URL=http://localhost:3000
 
 ## Short-Term Roadmap
 
-- Push Notification
-- Inventory Analytics
-- Recipe Search Improvement
-- Better AI Recommendation
+* Push Notification
+* Inventory Analytics
+* Recipe Search Improvement
+* Better AI Recommendation
+* Enhanced Dashboard Insights
 
 ---
 
 ## Long-Term Roadmap
 
-- Mobile Application
-- OCR Ingredient Scanner
-- Smart Shopping List
-- Food Waste Prediction
-- Personalized Nutrition Recommendation
+* Mobile Application
+* OCR Ingredient Scanner
+* Smart Shopping List
+* Food Waste Prediction
+* Personalized Nutrition Recommendation
+* Household Shared Inventory
 
 ---
 
@@ -442,9 +476,11 @@ VITE_API_URL=http://localhost:3000
 ## Full Stack Developer
 
 ### CFCC119D6Y2465
+
 **Agus Subekti**
 
 ### CFCC694D6Y1122
+
 **Afnan Putra Yulianto**
 
 ---
@@ -452,9 +488,11 @@ VITE_API_URL=http://localhost:3000
 ## Data Scientist
 
 ### CDCC006D6X1781
+
 **Hyacintha Shafa Athalia Hardianto**
 
 ### CDCC006D6X2352
+
 **Gavrilla Claudia Andhinie Hendi**
 
 ---
@@ -462,9 +500,11 @@ VITE_API_URL=http://localhost:3000
 ## AI Engineer
 
 ### CACC119D6Y0707
+
 **Riyan Sandi Prayoga**
 
 ### CACC119D6Y2563
+
 **Michael Mathew**
 
 ---
@@ -481,6 +521,6 @@ MIT License © 2026 SisaBisa Team
 
 ### 🌱 Reducing Food Waste Through Technology
 
-Built with ❤️ by Team SisaBisa
+**Built with ❤️ by Team SisaBisa**
 
 </div>
