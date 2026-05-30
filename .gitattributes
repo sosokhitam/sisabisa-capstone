@@ -1,0 +1,2 @@
+Ai[[:space:]]Engineer/**/*.npy filter=lfs diff=lfs merge=lfs -text
+Ai[[:space:]]Engineer/**/*.keras filter=lfs diff=lfs merge=lfs -text

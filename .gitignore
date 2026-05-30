@@ -1,0 +1,16 @@
+node_modules
+.env
+dist
+build
+.vscode
+.DS_Store
+
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+
+dataset_resep_format_final.xlsx
+tower_kulkas.keras
+*.npy
+fit/
+*.tfevents.*
