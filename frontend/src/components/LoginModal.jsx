@@ -2,7 +2,7 @@ import { X, Eye, EyeOff, Mail, LockKeyhole, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
 export default function LoginModal({ onClose, onSwitchToRegister }) {

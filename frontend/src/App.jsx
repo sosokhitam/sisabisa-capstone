@@ -3,7 +3,7 @@ import Dashboard from './pages/user/Dashboard';
 import AdminDashboard from './pages/user/AdminDashboard';
 import Inventory from './pages/user/Inventory';
 import Home from './pages/public/Home';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './context/auth';
 import Recommendations from './pages/user/Recommendations';
 import FavoriteRecipes from './pages/user/FavoriteRecipes';
 import ForgotPassword from './pages/public/ForgotPassword';

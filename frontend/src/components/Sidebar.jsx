@@ -9,7 +9,7 @@ import {
   X,
   Bookmark,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 import LogoutConfirmModal from './LogoutConfirmModal';
 
 export default function Sidebar({ isOpen = false, onClose }) {
