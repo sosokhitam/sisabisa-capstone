@@ -291,7 +291,7 @@ export const deleteInventory = async (req, res) => {
 export const updateInventoryStorage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { storage, purchase_date } = req.body;
+    const { storage, purchase_date, quantity, unit } = req.body;
 
     if (!storage) {
       return res.status(400).json({
@@ -360,6 +360,16 @@ export const updateInventoryStorage = async (req, res) => {
 
     const calculatedExpiredAt = expiredDate.toISOString().split('T')[0];
 
+    const finalQuantity =
+      quantity !== undefined && quantity !== null && quantity !== ''
+        ? quantity
+        : inventory.quantity;
+
+    const finalUnit =
+      unit !== undefined && unit !== null
+        ? unit
+        : inventory.unit;
+
     const result = await pool.query(
       `
       UPDATE user_inventory
@@ -367,21 +377,25 @@ export const updateInventoryStorage = async (req, res) => {
         storage = $1,
         purchase_date = $2,
         expired_at = $3,
+        quantity = $4,
+        unit = $5,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $4 AND user_id = $5
+      WHERE id = $6 AND user_id = $7
       RETURNING *
       `,
       [
         rule.storage,
         usedPurchaseDate,
         calculatedExpiredAt,
+        finalQuantity,
+        finalUnit,
         id,
         req.user.id,
       ]
     );
 
     res.json({
-      message: 'Storage inventory berhasil diperbarui',
+      message: 'Inventory berhasil diperbarui',
       data: result.rows[0],
     });
   } catch (error) {
