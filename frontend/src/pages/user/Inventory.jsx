@@ -12,21 +12,35 @@ import {
   AlertTriangle,
   CheckCircle,
   Sparkles,
+  Pencil,
+  X,
+  Loader2,
 } from 'lucide-react';
 import api from '../../api/axios';
 import UserLayout from '../../layouts/UserLayout';
 
 export default function Inventory() {
-  const [items, setItems]                       = useState([]);
-  const [search, setSearch]                     = useState('');
-  const [inventorySearch, setInventorySearch]   = useState('');
-  const [filter, setFilter]                     = useState('all');
-  const [suggestions, setSuggestions]           = useState([]);
+  const [items, setItems] = useState([]);
+  const [search, setSearch] = useState('');
+  const [inventorySearch, setInventorySearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [suggestions, setSuggestions] = useState([]);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
-  const [deleteTarget, setDeleteTarget]         = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const [editTarget, setEditTarget] = useState(null);
+  const [editStorageRules, setEditStorageRules] = useState([]);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editForm, setEditForm] = useState({
+    storage: '',
+    purchase_date: '',
+  });
 
   const [form, setForm] = useState({
-    quantity: '', unit: '', storage: '', purchase_date: '',
+    quantity: '',
+    unit: '',
+    storage: '',
+    purchase_date: '',
   });
 
   const fetchInventory = async () => {
@@ -34,8 +48,14 @@ export default function Inventory() {
     return response.data.data || [];
   };
 
+  const refreshInventory = async () => {
+    const data = await fetchInventory();
+    setItems(data);
+  };
+
   useEffect(() => {
     let ignore = false;
+
     const loadInventory = async () => {
       try {
         const data = await fetchInventory();
@@ -44,26 +64,61 @@ export default function Inventory() {
         toast.error('Gagal memuat inventory');
       }
     };
+
     loadInventory();
-    return () => { ignore = true; };
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const getExpiryStatus = (expiredAt) => {
-    const today       = new Date();
+    const today = new Date();
     const expiredDate = new Date(expiredAt);
+
     today.setHours(0, 0, 0, 0);
     expiredDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((expiredDate - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0)  return { key: 'expired', label: 'Expired',           icon: AlertTriangle, className: 'bg-orange-100 text-orange-800 border border-orange-200/60' };
-    if (diffDays <= 3) return { key: 'soon',    label: `${diffDays} hari lagi`, icon: AlertTriangle, className: 'bg-amber-50 text-amber-700 border border-amber-200/50' };
-    return               { key: 'safe',    label: 'Aman',               icon: CheckCircle,   className: 'bg-green-100 text-green-800 border border-green-200/50' };
+    const diffDays = Math.ceil(
+      (expiredDate - today) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays < 0) {
+      return {
+        key: 'expired',
+        label: 'Expired',
+        icon: AlertTriangle,
+        className:
+          'bg-orange-100 text-orange-800 border border-orange-200/60',
+      };
+    }
+
+    if (diffDays <= 3) {
+      return {
+        key: 'soon',
+        label: `${diffDays} hari lagi`,
+        icon: AlertTriangle,
+        className:
+          'bg-amber-50 text-amber-700 border border-amber-200/50',
+      };
+    }
+
+    return {
+      key: 'safe',
+      label: 'Aman',
+      icon: CheckCircle,
+      className:
+        'bg-green-100 text-green-800 border border-green-200/50',
+    };
   };
 
   const filteredItems = items.filter((item) => {
     const status = getExpiryStatus(item.expired_at);
-    const matchesSearch = item.ingredient_name?.toLowerCase().includes(inventorySearch.toLowerCase());
+    const matchesSearch = item.ingredient_name
+      ?.toLowerCase()
+      .includes(inventorySearch.toLowerCase());
     const matchesFilter = filter === 'all' || status.key === filter;
+
     return matchesSearch && matchesFilter;
   });
 
@@ -71,9 +126,17 @@ export default function Inventory() {
     setSearch(value);
     setSelectedIngredient(null);
     setForm({ ...form, storage: '' });
-    if (value.length < 2) { setSuggestions([]); return; }
+
+    if (value.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
     try {
-      const response = await api.get('/public/ingredients', { params: { search: value } });
+      const response = await api.get('/public/ingredients', {
+        params: { search: value },
+      });
+
       setSuggestions(response.data.data || []);
     } catch {
       toast.error('Gagal mencari bahan');
@@ -87,23 +150,44 @@ export default function Inventory() {
     setForm({ ...form, storage: '' });
   };
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!selectedIngredient) { toast.error('Pilih bahan dari suggestion terlebih dahulu'); return; }
-    if (!form.storage)        { toast.error('Pilih kondisi penyimpanan'); return; }
+
+    if (!selectedIngredient) {
+      toast.error('Pilih bahan dari suggestion terlebih dahulu');
+      return;
+    }
+
+    if (!form.storage) {
+      toast.error('Pilih kondisi penyimpanan');
+      return;
+    }
+
     try {
       await api.post('/inventory', {
         ingredient_id: selectedIngredient.ingredient_id,
-        storage: form.storage, quantity: form.quantity,
-        unit: form.unit, purchase_date: form.purchase_date,
+        storage: form.storage,
+        quantity: form.quantity,
+        unit: form.unit,
+        purchase_date: form.purchase_date,
       });
-      setSearch(''); setSelectedIngredient(null); setSuggestions([]);
-      setForm({ quantity: '', unit: '', storage: '', purchase_date: '' });
+
+      setSearch('');
+      setSelectedIngredient(null);
+      setSuggestions([]);
+      setForm({
+        quantity: '',
+        unit: '',
+        storage: '',
+        purchase_date: '',
+      });
+
       toast.success('Bahan berhasil ditambahkan');
-      const data = await fetchInventory();
-      setItems(data);
+      await refreshInventory();
     } catch {
       toast.error('Gagal menambah inventory');
     }
@@ -111,34 +195,111 @@ export default function Inventory() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+
     try {
       await api.delete(`/inventory/${deleteTarget.id}`);
       toast.success('Bahan berhasil dihapus');
-      const data = await fetchInventory();
-      setItems(data);
+      await refreshInventory();
       setDeleteTarget(null);
     } catch {
       toast.error('Gagal menghapus bahan');
     }
   };
 
+  const handleOpenEditStorage = async (item) => {
+    setEditTarget(item);
+    setEditLoading(true);
+    setEditStorageRules([]);
+    setEditForm({
+      storage: item.storage || '',
+      purchase_date:
+        item.purchase_date ||
+        item.created_at?.split('T')[0] ||
+        new Date().toISOString().split('T')[0],
+    });
+
+    try {
+      const response = await api.get('/public/ingredients', {
+        params: { search: item.ingredient_name },
+      });
+
+      const ingredients = response.data.data || [];
+
+      const matchedIngredient =
+        ingredients.find(
+          (ingredient) =>
+            ingredient.ingredient_id === item.ingredient_id ||
+            ingredient.item?.toLowerCase() ===
+              item.ingredient_name?.toLowerCase()
+        ) || ingredients[0];
+
+      setEditStorageRules(matchedIngredient?.storage_rules || []);
+    } catch {
+      toast.error('Gagal mengambil storage rules');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleCloseEditStorage = () => {
+    setEditTarget(null);
+    setEditStorageRules([]);
+    setEditForm({
+      storage: '',
+      purchase_date: '',
+    });
+  };
+
+  const handleUpdateStorage = async (e) => {
+    e.preventDefault();
+
+    if (!editTarget) return;
+
+    if (!editForm.storage) {
+      toast.error('Pilih storage terlebih dahulu');
+      return;
+    }
+
+    if (!editForm.purchase_date) {
+      toast.error('Tanggal beli wajib diisi');
+      return;
+    }
+
+    try {
+      setEditLoading(true);
+
+      await api.patch(`/inventory/${editTarget.id}/storage`, {
+        storage: editForm.storage,
+        purchase_date: editForm.purchase_date,
+      });
+
+      toast.success('Storage berhasil diperbarui');
+      handleCloseEditStorage();
+      await refreshInventory();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || 'Gagal memperbarui storage'
+      );
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const filterOptions = [
-    { label: 'Semua',         value: 'all'     },
-    { label: 'Aman',          value: 'safe'    },
-    { label: 'Hampir Expired',value: 'soon'    },
-    { label: 'Expired',       value: 'expired' },
+    { label: 'Semua', value: 'all' },
+    { label: 'Aman', value: 'safe' },
+    { label: 'Hampir Expired', value: 'soon' },
+    { label: 'Expired', value: 'expired' },
   ];
 
   const selectedStorageRules = selectedIngredient?.storage_rules || [];
 
-  /* input class reused */
-  const inputCls = 'w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/15 transition-all duration-200 bg-white text-sm placeholder:text-slate-400';
+  const inputCls =
+    'w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/15 transition-all duration-200 bg-white text-sm placeholder:text-slate-400';
 
   return (
     <UserLayout>
       <div className="space-y-5 md:space-y-6">
-
-        {/* ── Page header banner ── */}
         <motion.section
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -154,11 +315,14 @@ export default function Inventory() {
                 <Sparkles size={12} className="animate-pulse" />
                 Inventory Management
               </div>
+
               <h1 className="text-2xl md:text-4xl font-black leading-tight tracking-tight">
                 Kelola Bahan Makanan
               </h1>
+
               <p className="text-green-100/80 mt-3 max-w-xl text-sm md:text-base leading-relaxed font-medium">
-                Tambahkan bahan, pilih kondisi penyimpanan, dan sistem akan menghitung estimasi kadaluarsa secara otomatis.
+                Tambahkan bahan, pilih kondisi penyimpanan, dan sistem akan
+                menghitung estimasi kadaluarsa secara otomatis.
               </p>
             </div>
 
@@ -166,14 +330,17 @@ export default function Inventory() {
               whileHover={{ scale: 1.04 }}
               className="bg-white/12 border border-white/20 rounded-2xl p-5 md:min-w-44 text-center md:text-left flex-shrink-0"
             >
-              <p className="text-green-100/80 text-sm font-semibold">Total Inventory</p>
+              <p className="text-green-100/80 text-sm font-semibold">
+                Total Inventory
+              </p>
               <p className="text-4xl font-black mt-1">{items.length}</p>
-              <p className="text-green-100/70 text-xs mt-1 font-medium">bahan tersimpan</p>
+              <p className="text-green-100/70 text-xs mt-1 font-medium">
+                bahan tersimpan
+              </p>
             </motion.div>
           </div>
         </motion.section>
 
-        {/* ── Add form ── */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,18 +351,29 @@ export default function Inventory() {
             <div className="bg-gradient-to-br from-green-700 to-green-600 text-white p-3 rounded-2xl shadow-md shadow-green-700/20 flex-shrink-0">
               <Plus size={20} />
             </div>
+
             <div>
-              <h2 className="font-bold text-lg text-slate-900 tracking-tight">Tambah Bahan</h2>
+              <h2 className="font-bold text-lg text-slate-900 tracking-tight">
+                Tambah Bahan
+              </h2>
+
               <p className="text-sm text-slate-400 mt-0.5">
-                Cari bahan dari data master, pilih storage, lalu sistem menghitung expired otomatis.
+                Cari bahan dari data master, pilih storage, lalu sistem
+                menghitung expired otomatis.
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Search with dropdown */}
+          <form
+            onSubmit={handleAdd}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="relative md:col-span-2">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -217,39 +395,83 @@ export default function Inventory() {
                       onClick={() => handleSelectIngredient(item)}
                       className="w-full text-left px-4 py-3 hover:bg-green-50/60 transition-colors duration-150 first:rounded-t-2xl last:rounded-b-2xl"
                     >
-                      <p className="font-semibold text-green-950 text-sm">{item.item}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{item.category}</p>
+                      <p className="font-semibold text-green-950 text-sm">
+                        {item.item}
+                      </p>
+
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {item.category}
+                      </p>
                     </button>
                   ))}
                 </motion.div>
               )}
             </div>
 
-            {/* Selected ingredient badge */}
             {selectedIngredient && (
               <div className="md:col-span-2 bg-green-50 border border-green-200/60 text-green-800 font-medium rounded-2xl px-4 py-3 text-sm flex items-center gap-2">
-                <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
+                <CheckCircle
+                  size={16}
+                  className="text-green-600 flex-shrink-0"
+                />
+
                 <span>
                   Dipilih:{' '}
-                  <span className="font-extrabold text-green-900">{selectedIngredient.item}</span>
-                  {' '}— {selectedIngredient.category}
+                  <span className="font-extrabold text-green-900">
+                    {selectedIngredient.item}
+                  </span>{' '}
+                  — {selectedIngredient.category}
                 </span>
               </div>
             )}
 
-            <input name="quantity"      value={form.quantity}      onChange={handleChange} placeholder="Jumlah" type="number" className={inputCls} required />
-            <input name="unit"          value={form.unit}          onChange={handleChange} placeholder="Satuan, contoh: butir" className={inputCls} />
+            <input
+              name="quantity"
+              value={form.quantity}
+              onChange={handleChange}
+              placeholder="Jumlah"
+              type="number"
+              className={inputCls}
+              required
+            />
 
-            <select name="storage" value={form.storage} onChange={handleChange} className={`${inputCls}`} required disabled={!selectedIngredient}>
-              <option value="">{selectedIngredient ? 'Pilih kondisi penyimpanan' : 'Pilih bahan terlebih dahulu'}</option>
+            <input
+              name="unit"
+              value={form.unit}
+              onChange={handleChange}
+              placeholder="Satuan, contoh: butir"
+              className={inputCls}
+            />
+
+            <select
+              name="storage"
+              value={form.storage}
+              onChange={handleChange}
+              className={inputCls}
+              required
+              disabled={!selectedIngredient}
+            >
+              <option value="">
+                {selectedIngredient
+                  ? 'Pilih kondisi penyimpanan'
+                  : 'Pilih bahan terlebih dahulu'}
+              </option>
+
               {selectedStorageRules.map((rule) => (
                 <option key={rule.storage} value={rule.storage}>
-                  {rule.storage} — {rule.days} hari
+                  {rule.storage}
                 </option>
               ))}
             </select>
 
-            <input name="purchase_date" value={form.purchase_date} onChange={handleChange} type="date" className={inputCls} required />
+            <input
+              name="purchase_date"
+              value={form.purchase_date}
+              onChange={handleChange}
+              type="date"
+              className={inputCls}
+              required
+            />
 
             <button className="md:col-span-2 bg-[#FFA02E] hover:bg-[#e08316] active:scale-[0.99] transition-all duration-200 text-white py-3.5 rounded-2xl font-bold shadow-md shadow-orange-400/20 hover:shadow-lg hover:shadow-orange-400/25 hover:-translate-y-0.5 cursor-pointer">
               Tambah ke Inventory
@@ -257,33 +479,41 @@ export default function Inventory() {
           </form>
         </motion.section>
 
-        {/* ── Inventory list ── */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0.14 }}
           className="bg-white rounded-3xl shadow-sm border border-slate-100/80 p-5 md:p-6"
         >
-          {/* List header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
             <div className="flex items-start gap-3">
               <div className="bg-green-100 text-green-700 p-3 rounded-2xl flex-shrink-0">
                 <Package size={20} />
               </div>
+
               <div>
-                <h2 className="font-bold text-lg text-slate-900 tracking-tight">Daftar Inventory</h2>
-                <p className="text-sm text-slate-400">Menampilkan {filteredItems.length} dari {items.length} bahan.</p>
+                <h2 className="font-bold text-lg text-slate-900 tracking-tight">
+                  Daftar Inventory
+                </h2>
+
+                <p className="text-sm text-slate-400">
+                  Menampilkan {filteredItems.length} dari {items.length} bahan.
+                </p>
               </div>
             </div>
+
             <span className="bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
               {filteredItems.length} hasil
             </span>
           </div>
 
-          {/* Search + Filter */}
           <div className="flex flex-col sm:flex-row gap-3 mb-5">
             <div className="relative flex-1">
-              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Search
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+
               <input
                 value={inventorySearch}
                 onChange={(e) => setInventorySearch(e.target.value)}
@@ -292,7 +522,6 @@ export default function Inventory() {
               />
             </div>
 
-            {/* Filter pills */}
             <div className="flex flex-wrap gap-2">
               {filterOptions.map((opt) => (
                 <button
@@ -310,10 +539,9 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Item cards */}
           <div className="space-y-3">
             {filteredItems.map((item, index) => {
-              const status     = getExpiryStatus(item.expired_at);
+              const status = getExpiryStatus(item.expired_at);
               const StatusIcon = status.icon;
 
               return (
@@ -329,30 +557,63 @@ export default function Inventory() {
                     <div className="bg-green-50 text-green-700 p-3 rounded-2xl flex-shrink-0 shadow-sm">
                       <Refrigerator size={20} />
                     </div>
+
                     <div className="min-w-0">
-                      <h3 className="font-bold text-base md:text-[1.05rem] capitalize text-green-950 tracking-tight">{item.ingredient_name}</h3>
-                      <p className="text-sm text-slate-500 mt-1 font-medium">{item.quantity} {item.unit}</p>
+                      <h3 className="font-bold text-base md:text-[1.05rem] capitalize text-green-950 tracking-tight">
+                        {item.ingredient_name}
+                      </h3>
+
+                      <p className="text-sm text-slate-500 mt-1 font-medium">
+                        {item.quantity} {item.unit}
+                      </p>
+
                       {item.storage && (
-                        <p className="text-xs text-slate-400 mt-0.5 font-medium">📦 {item.storage}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                          📦 {item.storage}
+                        </p>
                       )}
+
                       <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1.5 font-medium">
                         <CalendarDays size={13} className="flex-shrink-0" />
-                        <span>Expired: {new Date(item.expired_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                        <span>
+                          Expired:{' '}
+                          {new Date(item.expired_at).toLocaleDateString(
+                            'id-ID',
+                            {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric',
+                            }
+                          )}
+                        </span>
                       </div>
-                      <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
+
+                      <span
+                        className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}
+                      >
                         <StatusIcon size={12} />
                         {status.label}
                       </span>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setDeleteTarget(item)}
-                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 active:scale-[0.98] text-orange-700 px-4 py-2.5 rounded-2xl font-bold transition-all duration-200 cursor-pointer border border-orange-100/60 hover:-translate-y-0.5 text-sm"
-                  >
-                    <Trash2 size={16} />
-                    Hapus
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <button
+                      onClick={() => handleOpenEditStorage(item)}
+                      className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 active:scale-[0.98] text-green-700 px-4 py-2.5 rounded-2xl font-bold transition-all duration-200 cursor-pointer border border-green-100/60 hover:-translate-y-0.5 text-sm"
+                    >
+                      <Pencil size={16} />
+                      Edit Storage
+                    </button>
+
+                    <button
+                      onClick={() => setDeleteTarget(item)}
+                      className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 active:scale-[0.98] text-orange-700 px-4 py-2.5 rounded-2xl font-bold transition-all duration-200 cursor-pointer border border-orange-100/60 hover:-translate-y-0.5 text-sm"
+                    >
+                      <Trash2 size={16} />
+                      Hapus
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
@@ -366,8 +627,14 @@ export default function Inventory() {
                 <div className="mx-auto bg-green-100 text-green-700 w-16 h-16 rounded-3xl flex items-center justify-center shadow-sm mb-4">
                   <Package size={28} />
                 </div>
-                <h3 className="font-bold text-green-950">Tidak ada inventory yang cocok</h3>
-                <p className="text-slate-400 mt-1.5 text-sm">Coba ubah kata pencarian atau filter yang digunakan.</p>
+
+                <h3 className="font-bold text-green-950">
+                  Tidak ada inventory yang cocok
+                </h3>
+
+                <p className="text-slate-400 mt-1.5 text-sm">
+                  Coba ubah kata pencarian atau filter yang digunakan.
+                </p>
               </motion.div>
             )}
           </div>
@@ -379,6 +646,121 @@ export default function Inventory() {
             onCancel={() => setDeleteTarget(null)}
             onConfirm={handleDelete}
           />
+        )}
+
+        {editTarget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 md:p-6"
+            >
+              <div className="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">
+                    Edit Storage
+                  </h2>
+
+                  <p className="text-sm text-slate-500 mt-1">
+                    Ubah penyimpanan untuk menghitung ulang tanggal expired.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCloseEditStorage}
+                  className="rounded-2xl bg-slate-100 hover:bg-slate-200 p-2 text-slate-600 transition"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="rounded-2xl bg-green-50 border border-green-100 p-4 mb-4">
+                <p className="text-sm text-green-700">Bahan</p>
+                <p className="font-black text-green-950 capitalize mt-1">
+                  {editTarget.ingredient_name}
+                </p>
+              </div>
+
+              <form onSubmit={handleUpdateStorage} className="space-y-4">
+                <div>
+                  <label className="text-sm font-bold text-slate-700">
+                    Storage Baru
+                  </label>
+
+                  <select
+                    value={editForm.storage}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        storage: e.target.value,
+                      })
+                    }
+                    className={`${inputCls} mt-1`}
+                    required
+                    disabled={editLoading}
+                  >
+                    <option value="">
+                      {editLoading
+                        ? 'Memuat storage...'
+                        : 'Pilih storage baru'}
+                    </option>
+
+                    {editStorageRules.map((rule) => (
+                      <option key={rule.storage} value={rule.storage}>
+                        {rule.storage}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-slate-700">
+                    Tanggal Beli
+                  </label>
+
+                  <input
+                    type="date"
+                    value={editForm.purchase_date}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        purchase_date: e.target.value,
+                      })
+                    }
+                    className={`${inputCls} mt-1`}
+                    required
+                    disabled={editLoading}
+                  />
+
+                  <p className="text-xs text-slate-400 mt-2">
+                    Tanggal ini dipakai untuk menghitung ulang estimasi expired.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleCloseEditStorage}
+                    className="w-full rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 font-bold transition"
+                  >
+                    Batal
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={editLoading}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-green-700 hover:bg-green-800 disabled:bg-slate-400 text-white py-3 font-bold transition"
+                  >
+                    {editLoading && (
+                      <Loader2 size={17} className="animate-spin" />
+                    )}
+                    Simpan Storage
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
         )}
       </div>
     </UserLayout>
