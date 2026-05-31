@@ -287,3 +287,104 @@ export const deleteInventory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const updateInventoryStorage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { storage, purchase_date } = req.body;
+
+    if (!storage) {
+      return res.status(400).json({
+        message: 'Storage wajib diisi',
+      });
+    }
+
+    const inventoryResult = await pool.query(
+      `
+      SELECT *
+      FROM user_inventory
+      WHERE id = $1 AND user_id = $2
+      LIMIT 1
+      `,
+      [id, req.user.id]
+    );
+
+    if (inventoryResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Inventory tidak ditemukan',
+      });
+    }
+
+    const inventory = inventoryResult.rows[0];
+
+    if (!inventory.ingredient_id) {
+      return res.status(400).json({
+        message: 'Inventory lama belum memiliki ingredient_id',
+      });
+    }
+
+    const usedPurchaseDate =
+      purchase_date || inventory.purchase_date;
+
+    if (!usedPurchaseDate) {
+      return res.status(400).json({
+        message: 'Tanggal beli dibutuhkan untuk menghitung ulang expired',
+      });
+    }
+
+    const ruleResult = await pool.query(
+      `
+      SELECT 
+        storage,
+        days
+      FROM ingredient_storage_rules
+      WHERE ingredient_id = $1
+        AND LOWER(storage) = LOWER($2)
+      LIMIT 1
+      `,
+      [inventory.ingredient_id, storage.trim()]
+    );
+
+    if (ruleResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Aturan penyimpanan tidak ditemukan',
+      });
+    }
+
+    const rule = ruleResult.rows[0];
+
+    const purchaseDate = new Date(usedPurchaseDate);
+    const expiredDate = new Date(purchaseDate);
+
+    expiredDate.setDate(expiredDate.getDate() + Number(rule.days));
+
+    const calculatedExpiredAt = expiredDate.toISOString().split('T')[0];
+
+    const result = await pool.query(
+      `
+      UPDATE user_inventory
+      SET 
+        storage = $1,
+        purchase_date = $2,
+        expired_at = $3,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $4 AND user_id = $5
+      RETURNING *
+      `,
+      [
+        rule.storage,
+        usedPurchaseDate,
+        calculatedExpiredAt,
+        id,
+        req.user.id,
+      ]
+    );
+
+    res.json({
+      message: 'Storage inventory berhasil diperbarui',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
