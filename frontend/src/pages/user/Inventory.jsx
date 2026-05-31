@@ -15,6 +15,7 @@ import {
   Pencil,
   X,
   Loader2,
+  ChevronDown,
 } from 'lucide-react';
 import api from '../../api/axios';
 import UserLayout from '../../layouts/UserLayout';
@@ -32,6 +33,8 @@ export default function Inventory() {
   const [editStorageRules, setEditStorageRules] = useState([]);
   const [editLoading, setEditLoading] = useState(false);
   const [editForm, setEditForm] = useState({
+    quantity: '',
+    unit: '',
     storage: '',
     purchase_date: '',
   });
@@ -42,6 +45,9 @@ export default function Inventory() {
     storage: '',
     purchase_date: '',
   });
+
+  const inputCls =
+    'w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/15 transition-all duration-200 bg-white text-sm placeholder:text-slate-400';
 
   const fetchInventory = async () => {
     const response = await api.get('/inventory');
@@ -98,8 +104,7 @@ export default function Inventory() {
         key: 'soon',
         label: `${diffDays} hari lagi`,
         icon: AlertTriangle,
-        className:
-          'bg-amber-50 text-amber-700 border border-amber-200/50',
+        className: 'bg-amber-50 text-amber-700 border border-amber-200/50',
       };
     }
 
@@ -107,8 +112,7 @@ export default function Inventory() {
       key: 'safe',
       label: 'Aman',
       icon: CheckCircle,
-      className:
-        'bg-green-100 text-green-800 border border-green-200/50',
+      className: 'bg-green-100 text-green-800 border border-green-200/50',
     };
   };
 
@@ -210,7 +214,10 @@ export default function Inventory() {
     setEditTarget(item);
     setEditLoading(true);
     setEditStorageRules([]);
+
     setEditForm({
+      quantity: item.quantity || '',
+      unit: item.unit || '',
       storage: item.storage || '',
       purchase_date:
         item.purchase_date ||
@@ -245,6 +252,8 @@ export default function Inventory() {
     setEditTarget(null);
     setEditStorageRules([]);
     setEditForm({
+      quantity: '',
+      unit: '',
       storage: '',
       purchase_date: '',
     });
@@ -254,6 +263,11 @@ export default function Inventory() {
     e.preventDefault();
 
     if (!editTarget) return;
+
+    if (!editForm.quantity) {
+      toast.error('Jumlah bahan wajib diisi');
+      return;
+    }
 
     if (!editForm.storage) {
       toast.error('Pilih storage terlebih dahulu');
@@ -269,16 +283,18 @@ export default function Inventory() {
       setEditLoading(true);
 
       await api.patch(`/inventory/${editTarget.id}/storage`, {
+        quantity: editForm.quantity,
+        unit: editForm.unit,
         storage: editForm.storage,
         purchase_date: editForm.purchase_date,
       });
 
-      toast.success('Storage berhasil diperbarui');
+      toast.success('Inventory berhasil diperbarui');
       handleCloseEditStorage();
       await refreshInventory();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'Gagal memperbarui storage'
+        error.response?.data?.message || 'Gagal memperbarui inventory'
       );
     } finally {
       setEditLoading(false);
@@ -286,16 +302,13 @@ export default function Inventory() {
   };
 
   const filterOptions = [
-    { label: 'Semua', value: 'all' },
+    { label: 'Semua Status', value: 'all' },
     { label: 'Aman', value: 'safe' },
     { label: 'Hampir Expired', value: 'soon' },
     { label: 'Expired', value: 'expired' },
   ];
 
   const selectedStorageRules = selectedIngredient?.storage_rules || [];
-
-  const inputCls =
-    'w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/15 transition-all duration-200 bg-white text-sm placeholder:text-slate-400';
 
   return (
     <UserLayout>
@@ -398,7 +411,6 @@ export default function Inventory() {
                       <p className="font-semibold text-green-950 text-sm">
                         {item.item}
                       </p>
-
                       <p className="text-xs text-slate-500 mt-0.5">
                         {item.category}
                       </p>
@@ -522,20 +534,23 @@ export default function Inventory() {
               />
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {filterOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setFilter(opt.value)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                    filter === opt.value
-                      ? 'bg-green-700 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-600 hover:bg-green-100 hover:text-green-800'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="relative w-full sm:w-56">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="w-full appearance-none border border-slate-200 bg-slate-50 hover:bg-white rounded-2xl px-4 py-3 pr-10 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-500/15 transition-all duration-200 text-sm font-bold text-slate-700 cursor-pointer"
+              >
+                {filterOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown
+                size={18}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
             </div>
           </div>
 
@@ -603,7 +618,7 @@ export default function Inventory() {
                       className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 active:scale-[0.98] text-green-700 px-4 py-2.5 rounded-2xl font-bold transition-all duration-200 cursor-pointer border border-green-100/60 hover:-translate-y-0.5 text-sm"
                     >
                       <Pencil size={16} />
-                      Edit Storage
+                      Edit
                     </button>
 
                     <button
@@ -658,11 +673,11 @@ export default function Inventory() {
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div>
                   <h2 className="text-xl font-black text-slate-900">
-                    Edit Storage
+                    Edit Inventory
                   </h2>
 
                   <p className="text-sm text-slate-500 mt-1">
-                    Ubah penyimpanan untuk menghitung ulang tanggal expired.
+                    Ubah jumlah, satuan, storage, dan tanggal beli.
                   </p>
                 </div>
 
@@ -683,6 +698,48 @@ export default function Inventory() {
               </div>
 
               <form onSubmit={handleUpdateStorage} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-bold text-slate-700">
+                      Jumlah
+                    </label>
+
+                    <input
+                      type="number"
+                      value={editForm.quantity}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          quantity: e.target.value,
+                        })
+                      }
+                      className={`${inputCls} mt-1`}
+                      required
+                      disabled={editLoading}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-bold text-slate-700">
+                      Satuan
+                    </label>
+
+                    <input
+                      type="text"
+                      value={editForm.unit}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          unit: e.target.value,
+                        })
+                      }
+                      className={`${inputCls} mt-1`}
+                      placeholder="kg, gram, butir"
+                      disabled={editLoading}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-sm font-bold text-slate-700">
                     Storage Baru
@@ -755,7 +812,7 @@ export default function Inventory() {
                     {editLoading && (
                       <Loader2 size={17} className="animate-spin" />
                     )}
-                    Simpan Storage
+                    Simpan
                   </button>
                 </div>
               </form>
