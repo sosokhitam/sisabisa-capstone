@@ -335,7 +335,7 @@ export default function Inventory() {
 
               <p className="text-green-100/80 mt-3 max-w-xl text-sm md:text-base leading-relaxed font-medium">
                 Tambahkan bahan, pilih kondisi penyimpanan, dan sistem akan
-                menghitung estimasi kadaluarsa secara otomatis.
+                menghitung estimasi kedaluwarsa secara otomatis.
               </p>
             </div>
 

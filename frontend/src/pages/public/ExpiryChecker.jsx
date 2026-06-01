@@ -116,7 +116,7 @@ export default function ExpiryChecker({ compact = false }) {
 
             <div>
               <h1 className="text-2xl font-bold text-slate-900">
-                Cek Estimasi Kadaluarsa
+                Cek Estimasi Kedaluwarsa Bahan Makanan
               </h1>
 
               <p className="text-slate-500 mt-1">
@@ -243,7 +243,7 @@ export default function ExpiryChecker({ compact = false }) {
             className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white py-3 rounded-2xl font-bold transition"
           >
             {loading && <Loader2 size={18} className="animate-spin" />}
-            {loading ? 'Mengecek...' : 'Cek Kadaluarsa'}
+            {loading ? 'Mengecek...' : 'Cek Kedaluwarsa'}
           </button>
         </form>
 

@@ -3,15 +3,12 @@ import {
   Leaf,
   Bell,
   ChefHat,
-  ArrowRight,
   Sparkles,
   PackageCheck,
   Recycle,
   Clock,
   MailCheck,
   ShieldCheck,
-  CheckCircle,
-  Search,
   TrendingDown,
 } from 'lucide-react';
 import RegisterModal from '../../components/RegisterModal';
@@ -107,7 +104,7 @@ export default function Home() {
 
               {/* Subtitle */}
               <p className="text-base md:text-[1.1rem] leading-relaxed text-slate-500 max-w-xl font-medium animate-fade-up" style={{ animationDelay: '160ms' }}>
-                SisaBisa membantu mencatat bahan, memantau masa kadaluarsa,
+                SisaBisa membantu mencatat bahan, memantau masa kedaluwarsa,
                 mengirim pengingat email, dan merekomendasikan resep dari AI
                 berdasarkan bahan yang hampir expired.
               </p>
@@ -153,7 +150,7 @@ export default function Home() {
                     <span className="text-[10px] font-extrabold text-green-600 uppercase tracking-widest">Live Demo</span>
                   </div>
                   <h3 className="text-2xl md:text-3xl font-extrabold text-green-950 mt-1 mb-1 tracking-tight">
-                    Cek Estimasi Kadaluarsa
+                    Cek Estimasi Kedaluwarsa
                   </h3>
                   <p className="text-slate-500 text-sm mb-6 font-medium">
                     Cari bahan, pilih penyimpanan, lihat estimasi expired.
@@ -192,7 +189,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <StepCard step="01" icon={PackageCheck} iconBg="bg-green-700" title="Track" subtitle="Catat Bahan" description="Tambahkan bahan makanan dengan jumlah, satuan, dan mode penyimpanan." />
-              <StepCard step="02" icon={Clock} iconBg="bg-yellow-500" title="Predict" subtitle="Estimasi Expired" description="Sistem menghitung otomatis kapan bahan kamu akan kadaluarsa berdasarkan storage rules." />
+              <StepCard step="02" icon={Clock} iconBg="bg-yellow-500" title="Predict" subtitle="Estimasi Expired" description="Sistem menghitung otomatis kapan bahan kamu akan kedaluwarsa berdasarkan storage rules." />
               <StepCard step="03" icon={ChefHat} iconBg="bg-orange-500" title="Recommend" subtitle="Resep dari AI" description="AI merekomendasikan resep terbaik berdasarkan bahan yang hampir expired." />
               <StepCard step="04" icon={TrendingDown} iconBg="bg-green-600" title="Reduce" subtitle="Kurangi Waste" description="Bahan terpakai tepat waktu. Food waste berkurang dan dompet lebih hemat." />
             </div>
@@ -222,7 +219,7 @@ export default function Home() {
               icon={Bell}
               badge="Notifikasi"
               title="Email Reminder Otomatis"
-              description="Dapatkan notifikasi email sebelum bahan kadaluarsa. Tidak ada lagi bahan yang terbuang karena lupa."
+              description="Dapatkan notifikasi email sebelum bahan kedaluwarsa. Tidak ada lagi bahan yang terbuang karena lupa."
               featured
             />
             <FeatureCard
