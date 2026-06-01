@@ -157,14 +157,14 @@ export default function Recommendations() {
             <button
               key={m}
               onClick={() => handleModeChange(m)}
-              className={`flex-1 py-3 md:py-4 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-sm ${
+                className={`flex-1 py-3 md:py-4 rounded-2xl font-bold transition-all duration-200 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 cursor-pointer text-sm ${
                 mode === m
                   ? 'bg-gradient-to-r from-green-700 to-green-600 text-white shadow-md shadow-green-700/15'
                   : 'text-slate-500 hover:text-green-700 hover:bg-green-50/60'
               }`}
             >
-              <Icon size={18} />
-              {label}
+              <Icon size={18} className={`flex-shrink-0 ${m === 'manual' ? 'translate-x-[0.5px] translate-y-[0.5px]' : ''}`} />
+              <span className="leading-tight text-center">{label}</span>
             </button>
           ))}
         </div>
@@ -241,7 +241,7 @@ export default function Recommendations() {
             <aside className="lg:col-span-1">
               <div className="bg-white rounded-3xl border border-slate-100/80 p-5 md:p-6 shadow-sm">
                 <div className="bg-gradient-to-br from-yellow-400 to-yellow-300 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-md shadow-yellow-400/20">
-                  <Search size={22} className="text-yellow-900" />
+                  <Search size={22} className="text-yellow-900 translate-x-[1px] translate-y-[1px]" />
                 </div>
                 <h2 className="font-bold text-lg mt-4 text-green-950 tracking-tight">Input Bahan Sendiri</h2>
                 <p className="text-slate-500 text-sm mt-2 leading-relaxed">
