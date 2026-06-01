@@ -12,6 +12,8 @@ import {
   Eye,
   Search,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import api from '../../api/axios';
 import UserLayout from '../../layouts/UserLayout';
@@ -53,6 +55,18 @@ export default function FavoriteRecipes() {
       difficultyFilter === 'all' || recipe.difficulty?.toLowerCase() === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, difficultyFilter]);
+
+  const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedFavorites = filteredFavorites.slice(startIndex, startIndex + itemsPerPage);
+
 
   const mapFavoriteToRecipe = (recipe) => ({
     nama_menu:         recipe.recipe_name,
@@ -143,13 +157,13 @@ export default function FavoriteRecipes() {
           </div>
 
           <p className="text-xs text-slate-400 mt-3 font-semibold">
-            Menampilkan {filteredFavorites.length} dari {favorites.length} resep favorit.
+            Menampilkan {paginatedFavorites.length} dari {filteredFavorites.length} resep favorit.
           </p>
         </section>
 
         {/* ── Recipe grid ── */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredFavorites.map((recipe, index) => (
+          {paginatedFavorites.map((recipe, index) => (
             <motion.div
               key={recipe.id}
               initial={{ opacity: 0, y: 14 }}
@@ -211,6 +225,53 @@ export default function FavoriteRecipes() {
             </motion.div>
           ))}
         </section>
+
+        {/* Pagination Controls */}
+        {filteredFavorites.length > itemsPerPage && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-3xl border border-slate-100/80 shadow-sm p-5">
+            <p className="text-xs text-slate-400 font-semibold order-2 sm:order-1">
+              Menampilkan <span className="text-slate-700 font-bold">{startIndex + 1}</span> -{' '}
+              <span className="text-slate-700 font-bold">
+                {Math.min(startIndex + itemsPerPage, filteredFavorites.length)}
+              </span>{' '}
+              dari <span className="text-slate-700 font-bold">{filteredFavorites.length}</span> resep.
+            </p>
+            <div className="flex items-center gap-1.5 order-1 sm:order-2">
+              <button
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                  className={`min-w-[2.25rem] h-9 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-green-700 text-white shadow-sm'
+                      : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── Empty state ── */}
         {filteredFavorites.length === 0 && (

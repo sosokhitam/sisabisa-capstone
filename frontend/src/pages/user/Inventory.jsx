@@ -16,6 +16,8 @@ import {
   X,
   Loader2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import api from '../../api/axios';
 import UserLayout from '../../layouts/UserLayout';
@@ -125,6 +127,17 @@ export default function Inventory() {
 
     return matchesSearch && matchesFilter;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [inventorySearch, filter]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   const handleSearch = async (value) => {
     setSearch(value);
@@ -480,7 +493,12 @@ export default function Inventory() {
               name="purchase_date"
               value={form.purchase_date}
               onChange={handleChange}
-              type="date"
+              placeholder="Tanggal Beli"
+              type={form.purchase_date ? 'date' : 'text'}
+              onFocus={(e) => (e.target.type = 'date')}
+              onBlur={(e) => {
+                if (!e.target.value) e.target.type = 'text';
+              }}
               className={inputCls}
               required
             />
@@ -555,7 +573,7 @@ export default function Inventory() {
           </div>
 
           <div className="space-y-3">
-            {filteredItems.map((item, index) => {
+            {paginatedItems.map((item, index) => {
               const status = getExpiryStatus(item.expired_at);
               const StatusIcon = status.icon;
 
@@ -653,6 +671,54 @@ export default function Inventory() {
               </motion.div>
             )}
           </div>
+
+            {/* Pagination Controls */}
+          {filteredItems.length > itemsPerPage && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-5 border-t border-slate-100">
+              <p className="text-xs text-slate-400 font-semibold order-2 sm:order-1">
+                Menampilkan <span className="text-slate-700 font-bold">{startIndex + 1}</span> -{' '}
+                <span className="text-slate-700 font-bold">
+                  {Math.min(startIndex + itemsPerPage, filteredItems.length)}
+                </span>{' '}
+                dari <span className="text-slate-700 font-bold">{filteredItems.length}</span> bahan.
+              </p>
+              <div className="flex items-center gap-1.5 order-1 sm:order-2">
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-[2.25rem] h-9 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      currentPage === page
+                        ? 'bg-green-700 text-white shadow-sm'
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
         </motion.section>
 
         {deleteTarget && (
