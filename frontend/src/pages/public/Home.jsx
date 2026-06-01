@@ -3,12 +3,15 @@ import {
   Leaf,
   Bell,
   ChefHat,
+  ArrowRight,
   Sparkles,
   PackageCheck,
   Recycle,
   Clock,
   MailCheck,
   ShieldCheck,
+  CheckCircle,
+  Search,
   TrendingDown,
 } from 'lucide-react';
 import RegisterModal from '../../components/RegisterModal';
