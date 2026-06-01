@@ -67,8 +67,8 @@ export default function FavoriteRecipes() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedFavorites = filteredFavorites.slice(startIndex, startIndex + itemsPerPage);
 
-
   const mapFavoriteToRecipe = (recipe) => ({
+    id:                recipe.id,
     nama_menu:         recipe.recipe_name,
     bahan_resep:       recipe.ingredients,
     langkah_memasak:   recipe.cooking_steps || [],
@@ -157,7 +157,7 @@ export default function FavoriteRecipes() {
           </div>
 
           <p className="text-xs text-slate-400 mt-3 font-semibold">
-            Menampilkan {paginatedFavorites.length} dari {filteredFavorites.length} resep favorit.
+            Menampilkan {filteredFavorites.length} dari {favorites.length} resep favorit.
           </p>
         </section>
 
@@ -304,6 +304,10 @@ export default function FavoriteRecipes() {
           <RecipeDetailModal
             recipe={selectedRecipe}
             onClose={() => setSelectedRecipe(null)}
+            onFavoriteToggle={async () => {
+              const data = await fetchFavorites();
+              setFavorites(data);
+            }}
           />
         )}
       </div>

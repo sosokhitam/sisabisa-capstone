@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import {
@@ -14,16 +14,48 @@ import {
   ChefHat,
   Bookmark,
   LoaderCircle,
+  Trash2,
 } from 'lucide-react';
 import api from '../api/axios';
 
-export default function RecipeDetailModal({ recipe, onClose }) {
+export default function RecipeDetailModal({ recipe, onClose, onFavoriteToggle }) {
   const [saving, setSaving] = useState(false);
+  const [favoriteId, setFavoriteId] = useState(null);
+  const [loadingFavorite, setLoadingFavorite] = useState(true);
 
   if (!recipe) return null;
 
   const steps = recipe.langkah_memasak || [];
   const nutrition = recipe.nutrisi || {};
+
+  useEffect(() => {
+    if (!recipe) return;
+    if (recipe.id) {
+      setFavoriteId(recipe.id);
+      setLoadingFavorite(false);
+      return;
+    }
+    let ignore = false;
+    const checkFavorite = async () => {
+      try {
+        setLoadingFavorite(true);
+        const response = await api.get('/favorites');
+        const favoritesList = response.data.data || [];
+        const matched = favoritesList.find(
+          (fav) => fav.recipe_name.toLowerCase() === recipe.nama_menu.toLowerCase()
+        );
+        if (!ignore && matched) {
+          setFavoriteId(matched.id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch favorites', error);
+      } finally {
+        if (!ignore) setLoadingFavorite(false);
+      }
+    };
+    checkFavorite();
+    return () => { ignore = true; };
+  }, [recipe]);
 
   const cleanStepText = (step, index) => {
     return step.replace(new RegExp(`^${index + 1}\\.\\s*`), '');
@@ -33,20 +65,33 @@ export default function RecipeDetailModal({ recipe, onClose }) {
     try {
       setSaving(true);
 
-      await api.post('/favorites', {
-        recipe_name: recipe.nama_menu,
-        ingredients: recipe.bahan_resep,
-        cooking_steps: steps,
-        nutrition,
-        cooking_time: recipe.waktu_masak,
-        difficulty: recipe.tingkat_kesulitan,
-        health_insight: recipe.insight_kesehatan,
-      });
-
-      toast.success('Resep berhasil disimpan');
+      if (favoriteId) {
+        // Unfavorite (Delete)
+        await api.delete(`/favorites/${favoriteId}`);
+        setFavoriteId(null);
+        toast.success('Resep dihapus dari favorit');
+        if (onFavoriteToggle) onFavoriteToggle();
+      } else {
+        // Save (Post)
+        const response = await api.post('/favorites', {
+          recipe_name: recipe.nama_menu,
+          ingredients: recipe.bahan_resep,
+          cooking_steps: steps,
+          nutrition,
+          cooking_time: recipe.waktu_masak,
+          difficulty: recipe.tingkat_kesulitan,
+          health_insight: recipe.insight_kesehatan,
+        });
+        const savedData = response.data?.data;
+        if (savedData && savedData.id) {
+          setFavoriteId(savedData.id);
+        }
+        toast.success('Resep berhasil disimpan');
+        if (onFavoriteToggle) onFavoriteToggle();
+      }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'Gagal menyimpan resep'
+        error.response?.data?.message || 'Gagal mengubah status favorit'
       );
     } finally {
       setSaving(false);
@@ -188,14 +233,20 @@ export default function RecipeDetailModal({ recipe, onClose }) {
           <button
             onClick={handleSaveRecipe}
             disabled={saving}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-slate-400 text-white py-3 rounded-2xl font-semibold inline-flex items-center justify-center gap-2 transition duration-200 shadow-md shadow-orange-500/10"
+            className={`w-full py-3 rounded-2xl font-semibold inline-flex items-center justify-center gap-2 transition duration-200 shadow-md ${
+              favoriteId
+                ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/10'
+                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/10'
+            } disabled:bg-slate-400`}
           >
             {saving ? (
               <LoaderCircle size={18} className="animate-spin" />
+            ) : favoriteId ? (
+              <Trash2 size={18} />
             ) : (
               <Bookmark size={18} />
             )}
-            Simpan
+            {favoriteId ? 'Hapus' : 'Simpan'}
           </button>
         </div>
 
@@ -210,14 +261,20 @@ export default function RecipeDetailModal({ recipe, onClose }) {
           <button
             onClick={handleSaveRecipe}
             disabled={saving}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-slate-400 text-white py-3 rounded-2xl font-semibold inline-flex items-center justify-center gap-2 transition duration-200 shadow-md shadow-orange-500/10"
+            className={`w-full py-3 rounded-2xl font-semibold inline-flex items-center justify-center gap-2 transition duration-200 shadow-md ${
+              favoriteId
+                ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/10'
+                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/10'
+            } disabled:bg-slate-400`}
           >
             {saving ? (
               <LoaderCircle size={18} className="animate-spin" />
+            ) : favoriteId ? (
+              <Trash2 size={18} />
             ) : (
               <Bookmark size={18} />
             )}
-            Simpan Resep
+            {favoriteId ? 'Hapus Resep' : 'Simpan Resep'}
           </button>
         </div>
       </motion.div>
