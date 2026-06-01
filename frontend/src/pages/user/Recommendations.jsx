@@ -66,7 +66,16 @@ export default function Recommendations() {
       setLoading(true); setMessage(''); setRecipes([]);
       await fetchExpiringItems();
       const response = await api.get('/recommendations');
-      setRecipes(response.data.data.results || []);
+
+const results = response.data.data?.results || [];
+setRecipes(results);
+
+if (results.length === 0) {
+  setMessage(
+    response.data.data?.message ||
+      'Belum ada resep yang cocok dari bahan inventory kamu. Coba tambahkan bahan lain atau gunakan mode Input Bahan Sendiri.'
+  );
+}
     } catch (error) {
       setMessage(error.response?.data?.message || 'AI sedang disiapkan. Silakan coba lagi beberapa saat.');
     } finally {
@@ -320,20 +329,26 @@ function RecommendationResult({ recipes, loading, message, detailLoading, getMat
   if (loading) return <AiLoadingState />;
 
   if (message) {
-    return (
-      <div className="bg-red-50 border border-red-200/60 text-red-800 rounded-3xl p-6 shadow-sm">
-        <p className="font-bold text-red-900">Rekomendasi belum bisa ditampilkan</p>
-        <p className="text-sm mt-1.5 leading-relaxed font-medium text-red-700">{message}</p>
-        <button
-          onClick={onRetry}
-          className="mt-4 inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer shadow-sm"
-        >
-          <RefreshCcw size={15} />
-          Coba Lagi
-        </button>
-      </div>
-    );
-  }
+  return (
+    <div className="bg-yellow-50 border border-yellow-200/60 text-yellow-800 rounded-3xl p-6 shadow-sm">
+      <p className="font-bold text-yellow-900">
+        Belum ada resep yang cocok
+      </p>
+
+      <p className="text-sm mt-1.5 leading-relaxed font-medium text-yellow-700">
+        {message}
+      </p>
+
+      <button
+        onClick={onRetry}
+        className="mt-4 inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer shadow-sm"
+      >
+        <RefreshCcw size={15} />
+        Coba Lagi
+      </button>
+    </div>
+  );
+}
 
   if (recipes.length === 0) {
     return (
